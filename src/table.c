@@ -3,9 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "table.h"
 #include "fileutils.h"
-#include "parser.h"
+#include "parserutils.h"
+#include "table.h"
+
 
 void free_header(HeaderCell *header)
 {
@@ -22,7 +23,6 @@ void free_line(Line *line, long column_count)
     if (!line) return;
 
     for (int i = 0; i < column_count; i++) {
-        free(line->cells[i].inner_name);
         free(line->cells[i].data);
     }
     free(line->cells);
@@ -72,11 +72,11 @@ bool is_column_name_valid(const char *str)
     return true;
 }
 
-Table* create_table(FILE *file, char **error_message)
+Table* create_table(FILE *file, char delimiter, char **error_message)
 {
     char *line = readLongString(file);
     HeaderCell *header_start_cell = malloc(sizeof(HeaderCell));
-    int col_count = create_header(line, header_start_cell, ',', error_message);
+    int col_count = create_header(line, header_start_cell, delimiter, error_message);
     free(line);
 
     if (*error_message) {
@@ -91,50 +91,31 @@ Table* create_table(FILE *file, char **error_message)
     table->first_line = NULL;
 
 
-    // // Читаем, пока функция не вернет NULL (EOF)
+    // Читаем, пока функция не вернет NULL (EOF)
     while ((line = readLongString(file)) != NULL) {
-        add_row(table, line, ',', error_message);
+        add_row(table, line, delimiter, error_message);
         free(line);
         if (*error_message) {
             free_table(table);
             return NULL;
         }
     }
-    
-    // if (!table) return NULL;
-    // table->header = NULL;
-    // table->lines = NULL;
-    // table->line_count = 0;
-    // table->column_count = 0;
-
-    // char *line;
-    // while ((line = readLongString(file)) != NULL) {
-    //     if (table->line_count == 0) {
-    //         table->column_count = create_header(line, &table->header, ',');
-    //         if (table->column_count < 0) {
-    //             free(line);
-    //             free_table(table);
-    //             return NULL; // Handle header creation failure
-    //         }
-    //     } else {
-    //         // Create cells and link with previous lines
-    //     }
-    //     free(line); // Free the line after processing
-    //     table->line_count++;
-    // }
-
     return table;
 }
 
 int create_header(const char *header_line, HeaderCell *header_cell, char delimiter, char **error_message)
 {
     if (*header_line != delimiter) {
-        *error_message = "First column name should be empty.";
+        char *message = "First column name should be empty.";
+        *error_message = malloc(strlen(message) + 1);
+        sprintf(*error_message, "%s", message);
         return -1;
     }
     char *tmp_header = malloc(strlen(header_line) + 1);
     if (!tmp_header) {
-        *error_message = "Failed to allocate memory for header.";
+        char *message = "Failed to allocate memory for header.";
+        *error_message = malloc(strlen(message) + 1);
+        sprintf(*error_message, "%s", message);
         return -1;
     }
     strcpy(tmp_header, header_line);
@@ -154,9 +135,12 @@ int create_header(const char *header_line, HeaderCell *header_cell, char delimit
         current->column_name = malloc(strlen(token) + 1);
         if (!current->column_name) {
             free(tmp_header);
-            *error_message = "Failed to allocate memory for column name.";
+            char *message = "Failed to allocate memory for column name: ";
+            *error_message = malloc(strlen(message) + strlen(token) + 1);
+            sprintf(*error_message, "%s%s", message, token); // Append the invalid name
             return -1; // Handle memory allocation failure
         }
+
         strcpy(current->column_name, token);
         token = strtok(NULL, &delimiter);
         if (token) {
@@ -174,7 +158,10 @@ int create_header(const char *header_line, HeaderCell *header_cell, char delimit
         
             current->next = malloc(sizeof(HeaderCell));
             if (!current->next) {
-                *error_message = "Failed to allocate memory for header cell.";
+                char *message = "Failed to allocate memory for header cell.";
+                *error_message = malloc(strlen(message) + 1);
+                sprintf(*error_message, "%s", message);
+                free(tmp_header);
                 return -1; // Handle memory allocation failure
             }
             current = current->next;
@@ -183,15 +170,17 @@ int create_header(const char *header_line, HeaderCell *header_cell, char delimit
         ++header_size;
     }
 
-    int deliemeter_count = 0;
+    int delimiter_count = 0;
     for (int i = 0, len = strlen(header_line); i < len; i++) {
         if (header_line[i] == delimiter) {
-            deliemeter_count++;
+            delimiter_count++;
         }
     }
-    if (deliemeter_count + 1 != header_size) {
+    if (delimiter_count + 1 != header_size) {
         free(tmp_header);
-        *error_message = "Too many empty column names.";
+        char *message = "Too many empty column names.";
+        *error_message = malloc(strlen(message) + 1);
+        sprintf(*error_message, "%s", message);
         return -1; 
     }
 
@@ -199,15 +188,14 @@ int create_header(const char *header_line, HeaderCell *header_cell, char delimit
     return header_size; // Success
 }   
 
-void add_row(Table *table, const char *line_str, char delimiter, char **error_message)
-{
-    size_t deliemeter_count = 0;
+void add_row(Table *table, const char *line_str, char delimiter, char **error_message) {
+    size_t delimiter_count = 0;
     for (size_t i = 0, len = strlen(line_str); i < len; i++) {
         if (line_str[i] == delimiter) {
-            deliemeter_count++;
+            delimiter_count++;
         }
     }
-    if (deliemeter_count + 1 != table->column_count) {
+    if (delimiter_count + 1 != table->column_count) {
         char *message = "Incorrect number of cells in line: ";
         *error_message = malloc(strlen(message) + strlen(line_str) + 1);
         sprintf(*error_message, "%s%s", message, line_str); // Append the invalid name to the error message
@@ -215,7 +203,9 @@ void add_row(Table *table, const char *line_str, char delimiter, char **error_me
     }
     Line *new_line = malloc(sizeof(Line));
     if (!new_line) {
-        *error_message = "Failed to allocate memory for new line.";
+        char *message = "Failed to allocate memory for new line.";
+        *error_message = malloc(strlen(message) + 1);
+        sprintf(*error_message, "%s", message);
         return; // Handle memory allocation failure
     }
     new_line->line_number = 0; // This should be set to the actual line number when processing
@@ -224,7 +214,9 @@ void add_row(Table *table, const char *line_str, char delimiter, char **error_me
 
     char *tmp_line = malloc(strlen(line_str) + 1);
     if (!tmp_line) {
-        *error_message = "Failed to allocate memory for temporary line.";
+        char *message = "Failed to allocate memory for temporary line.";
+        *error_message = malloc(strlen(message) + 1);
+        sprintf(*error_message, "%s", message);
         free(new_line);
         return; // Handle memory allocation failure
     }
@@ -273,12 +265,11 @@ void add_row(Table *table, const char *line_str, char delimiter, char **error_me
             free(tmp_line);
             return;
         }
-        new_line->cells[i].inner_name = malloc(strlen(column->column_name) + 1); // Assuming the name is not needed for now
-        strcpy(new_line->cells[i].inner_name, column->column_name);
-
+        new_line->cells[i].value_state = CELL_VALUE_UNPARSED;
+        
         new_line->cells[i].data = malloc(strlen(token) + 1);
         strcpy(new_line->cells[i].data, token);
-        
+        new_line->cells[i].value = 0; // Initialize the value to 0
         column = column->next; // Move to the next column in the header
     }
     token = strtok(NULL, &delimiter);
@@ -291,8 +282,7 @@ void add_row(Table *table, const char *line_str, char delimiter, char **error_me
     }
 }
 
-void print_table(Table *table)
-{
+void print_table(Table *table) {
     if (!table) {
         printf("Table is NULL.\n");
         return;
@@ -311,10 +301,9 @@ void print_table(Table *table)
     while (current_line) {
         printf("%ld", current_line->line_number);
         for (size_t i = 0; i < table->column_count - 1; i++) {
-            printf(",%s", current_line->cells[i].data);
+            printf(",%ld", current_line->cells[i].value);
         }
         printf("\n");
         current_line = current_line->next;
     }
-
 }

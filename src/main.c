@@ -18,15 +18,25 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    Table *table = create_table(csv_file, &error_message);
+    Table *table = create_table(csv_file, ',', &error_message);
     if (error_message) {
         printf("Error: %s\n", error_message);
         free(error_message);
+        fclose(csv_file);
         return 1;
     }
+    fclose(csv_file);
+
+    parse_table(table, &error_message);
+    if (error_message) {
+        printf("Error: %s\n", error_message);
+        free(error_message);
+        free_table(table);
+        return 1;
+    }
+    
     print_table(table);
     free_table(table);
-    fclose(csv_file);
     
     return 0;
 }

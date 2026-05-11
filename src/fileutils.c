@@ -2,16 +2,21 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 FILE* open_file_if_valid(const char *filename, char **error_message) {
     if (filename == NULL) {
-        *error_message = "No filename provided.";
+        char *message = "No filename provided.";
+        *error_message = malloc(strlen(message) + 1);
+        sprintf(*error_message, "%s", message);
         return NULL;
     }
 
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
-        *error_message = "Failed to open file.";
+        char *message = "Failed to open file: ";
+        *error_message = malloc(strlen(message) + strlen(filename) + 1);
+        sprintf(*error_message, "%s%s", message, filename);
         return NULL;
     }
 
