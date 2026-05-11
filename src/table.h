@@ -33,7 +33,7 @@ struct Table {
 };
 
 Table* create_table(FILE *file, char **error_message);
-int create_header(const char *header_line, HeaderCell *header, char delimiter, char **error_message);
+int create_header(const char *header_line, HeaderCell *header_cell, char delimiter, char **error_message);
 void add_row(Table *table, const char *line_str, char delimiter, char **error_message);
 Cell* create_cell(const char *name, const char *data);
 void free_table(Table *table);

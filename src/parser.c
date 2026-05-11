@@ -32,3 +32,9 @@ bool safe_strtol(const char *str, long *out_val)
     *out_val = val;
     return true;
 }
+
+// bool calculate_cell_values(const char *str, long *out_val)
+// {
+
+    
+// }

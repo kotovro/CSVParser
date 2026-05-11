@@ -75,17 +75,17 @@ bool is_column_name_valid(const char *str)
 Table* create_table(FILE *file, char **error_message)
 {
     char *line = readLongString(file);
-    HeaderCell *header = malloc(sizeof(HeaderCell));
-    int col_count = create_header(line, header, ',', error_message);
-
+    HeaderCell *header_start_cell = malloc(sizeof(HeaderCell));
+    int col_count = create_header(line, header_start_cell, ',', error_message);
     free(line);
+
     if (*error_message) {
-        free_header(header);
+        free_header(header_start_cell);
         return NULL;
     }
 
     Table *table = malloc(sizeof(Table));
-    table->first_header_cell = header;
+    table->first_header_cell = header_start_cell;
     table->column_count = col_count;
     table->line_count = 0;
     table->first_line = NULL;
@@ -126,7 +126,7 @@ Table* create_table(FILE *file, char **error_message)
     return table;
 }
 
-int create_header(const char *header_line, HeaderCell *header, char delimiter, char **error_message)
+int create_header(const char *header_line, HeaderCell *header_cell, char delimiter, char **error_message)
 {
     if (*header_line != delimiter) {
         *error_message = "First column name should be empty.";
@@ -139,11 +139,10 @@ int create_header(const char *header_line, HeaderCell *header, char delimiter, c
     }
     strcpy(tmp_header, header_line);
     char *token = strtok(tmp_header, &delimiter);
-    HeaderCell *current = header;
+    HeaderCell *current = header_cell;
     int header_size = 1;
 
     while (token) {
-
         if (!is_column_name_valid(token)) {
             char *message = "Invalid column name: ";
             *error_message = malloc(strlen(message) + strlen(token) + 1);
@@ -161,6 +160,18 @@ int create_header(const char *header_line, HeaderCell *header, char delimiter, c
         strcpy(current->column_name, token);
         token = strtok(NULL, &delimiter);
         if (token) {
+            HeaderCell *temp = header_cell;
+            while (temp) {
+                if (strcmp(temp->column_name, token) == 0) {
+                    char *message = "Duplicate column name: ";
+                    *error_message = malloc(strlen(message) + strlen(token) + 1);
+                    sprintf(*error_message, "%s%s", message, token);
+                    free(tmp_header);
+                    return -1;
+                }
+                temp = temp->next;
+            }
+        
             current->next = malloc(sizeof(HeaderCell));
             if (!current->next) {
                 *error_message = "Failed to allocate memory for header cell.";
@@ -190,6 +201,18 @@ int create_header(const char *header_line, HeaderCell *header, char delimiter, c
 
 void add_row(Table *table, const char *line_str, char delimiter, char **error_message)
 {
+    size_t deliemeter_count = 0;
+    for (size_t i = 0, len = strlen(line_str); i < len; i++) {
+        if (line_str[i] == delimiter) {
+            deliemeter_count++;
+        }
+    }
+    if (deliemeter_count + 1 != table->column_count) {
+        char *message = "Incorrect number of cells in line: ";
+        *error_message = malloc(strlen(message) + strlen(line_str) + 1);
+        sprintf(*error_message, "%s%s", message, line_str); // Append the invalid name to the error message
+        return; 
+    }
     Line *new_line = malloc(sizeof(Line));
     if (!new_line) {
         *error_message = "Failed to allocate memory for new line.";
