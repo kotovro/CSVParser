@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,11 +16,38 @@ void free_header(HeaderCell *header)
     }
 }
 
+bool is_column_name_valid(const char *str)
+{
+    if (str == NULL || *str == '\0') {
+        return false;
+    }
+
+    char last = '\0';
+
+    for (int i = 0; str[i] != '\0'; i++) {
+        char c = str[i];
+
+        // forbid arithmetic symbols
+        if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%') {
+            return false;
+        }
+
+        last = c;
+    }
+
+    // must not end with digit
+    if (isdigit((unsigned char)last)) {
+        return false;
+    }
+
+    return true;
+}
+
 Table* create_table(FILE *file, char **error_message)
 {
     char *line = readLongString(file);
     HeaderCell *header = malloc(sizeof(HeaderCell));
-    int col_count = create_header(line, header, ',', error_message);
+    create_header(line, header, ',', error_message);
 
     if (*error_message) {
         free(line);
@@ -83,6 +111,15 @@ int create_header(const char *header_line, HeaderCell *header, char delimiter, c
     int header_size = 1;
 
     while (token) {
+
+        if (!is_column_name_valid(token)) {
+            char *message = "Invalid column name: ";
+            *error_message = malloc(strlen(message) + strlen(token) + 1);
+            sprintf(*error_message, "%s%s", message, token); // Append the invalid name to the error message
+            free(tmp_header);
+            return -1;
+        }
+       
         current->column_name = malloc(strlen(token) + 1);
         if (!current->column_name) {
             free(tmp_header);
