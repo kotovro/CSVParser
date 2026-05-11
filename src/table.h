@@ -12,8 +12,6 @@ struct Cell {
     char *inner_name;
     char *data;
     int value;
-    bool is_valid;
-    Cell *next;
 };
 
 struct HeaderCell {
@@ -21,23 +19,25 @@ struct HeaderCell {
     char *column_name;
 };
 
-
 struct Line {
     Cell *cells;
-    bool is_valid;
-    int number;
+    long line_number;
+    Line *next;
 };
 
 struct Table {
-    HeaderCell *header;
-    Line *lines;
+    HeaderCell *first_header_cell;
+    Line *first_line;
     size_t line_count;
     size_t column_count;
 };
 
 Table* create_table(FILE *file, char **error_message);
 int create_header(const char *header_line, HeaderCell *header, char delimiter, char **error_message);
+void add_row(Table *table, const char *line_str, char delimiter, char **error_message);
 Cell* create_cell(const char *name, const char *data);
 void free_table(Table *table);
+void print_table(Table *table);
+
 
 #endif // __TABLE__
