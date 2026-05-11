@@ -3,6 +3,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+FILE* open_file_if_valid(const char *filename, char **error_message) {
+    if (filename == NULL) {
+        *error_message = "No filename provided.";
+        return NULL;
+    }
+
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        *error_message = "Failed to open file.";
+        return NULL;
+    }
+
+    return file;
+}
+
 char* readLongString(FILE* fp) 
 {
     char *str = NULL;
