@@ -76,6 +76,8 @@ Table* create_table(FILE *file, char delimiter, char **error_message)
 {
     char *line = readLongString(file);
     HeaderCell *header_start_cell = malloc(sizeof(HeaderCell));
+    header_start_cell->next = NULL;
+    header_start_cell->column_name = NULL;
     int col_count = create_header(line, header_start_cell, delimiter, error_message);
     free(line);
 
@@ -166,6 +168,7 @@ int create_header(const char *header_line, HeaderCell *header_cell, char delimit
             }
             current = current->next;
             current->next = NULL;
+            current->column_name = NULL;
         }
         ++header_size;
     }
