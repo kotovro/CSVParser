@@ -29,18 +29,16 @@ Cell* get_cell_by_position(Table *table, long column_index, long line_number)
     return NULL;
 }
 
-char* get_cell_reference_name(long column_index, long line_number, HeaderCell *first_header_cell)
+char* get_cell_reference_name(size_t column_index, size_t line_number, HeaderCell *first_header_cell)
 {
     HeaderCell *current = first_header_cell;
-    long current_index = 0;
+    size_t current_index = 0;
     while (current_index != column_index) {
         ++current_index;
         current = current->next;
     }
-
-    char line_number_str[33]; // Enough to hold 64-bit integer in base 10 
-    // _ltoa(line_number, line_number_str, 10);
-    sprintf(line_number_str, "%ld", line_number);
+    char line_number_str[33];
+    sprintf(line_number_str, "%zu", line_number);  // %zu for size_t, not %ld
     size_t name_len = strlen(current->column_name) + strlen(line_number_str) + 1;
     char *reference_name = malloc(name_len);
     snprintf(reference_name, name_len, "%s%s", current->column_name, line_number_str);

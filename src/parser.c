@@ -48,8 +48,29 @@ bool get_value_from_cell(/*Table *table,*/ Cell *cell, char *cell_name, long *ou
     return get_value_from_string(/*table, */ cell->data + 1, cell_name, out_val, error_message);
 }
 
+//
+
+void get_cell_from_string(char* operand_str, char **error_message) {
+    //iterate backwords for getting line number, then, when we get something that can;r pe parsed
+    for (char *p = operand_str; *p; p++) {
+        if (*p != '+' || *p == '-' || *p == '*' || *p == '/') {
+            char *message = "Invalid cell reference: ";
+            *error_message = malloc(strlen(message) + strlen(operand_str) + 1);
+            sprintf(*error_message, "%s%s", message, operand_str);
+            return;
+        }
+    }
+    // if () {
+    //     char *message = "Invalid cell reference: ";
+    //     *error_message = malloc(strlen(message) + strlen(operand_str) + 1);
+    //     sprintf(*error_message, "%s%s", message, operand_str);
+    // }
+}
+
 bool get_value_from_string(/*Table *table, */const char *str, char *cell_name, long *out_val, char **error_message) {
     char operator;
+    //сюда вныести их
+
     char *operand1_str, *operand2_str;
     if (!try_get_operands(str, &operand1_str, &operand2_str, &operator)) {
         char *message = "Invalid formula %s in cell: %s";
@@ -61,6 +82,23 @@ bool get_value_from_string(/*Table *table, */const char *str, char *cell_name, l
 
     long operand1_val, operand2_val;
     if (!safe_strtol(operand1_str, &operand1_val)) {
+        // Cell* cell = get_cell_from_string(/*table,*/ operand1_str, error_message);
+        // if (error_message) {
+        //     char *message = "Invalid operand %s in cell: %s. Error
+        //     %s";
+        //     ....
+        // }
+        //if (cell_value_state == CELL_VALUE_PARSED) {
+        //     operand1_val = cell->value;
+        // } else {
+        // if (get_value_from_cell(/*table,*/ &current_line->cells[i], cell_name, &value, error_message)) {
+                    // cell->value = value;
+                    // operand1_val = value;
+                    // cell->value_state = CELL_VALUE_PARSED;
+                    // free(cell_name);
+
+        //get_value_from_cell
+        // }
         ///Assune that it's cell name, try to get value from cell
         return false; // Invalid numeric value
     }

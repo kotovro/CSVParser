@@ -40,7 +40,7 @@ char* readLongString(FILE* fp)
             }
             str = tmp;
         }
-        str[len++] = current_char;
+        str[len++] = (char)current_char;
     }
 
     if (len == 0 && current_char == EOF) return NULL;
