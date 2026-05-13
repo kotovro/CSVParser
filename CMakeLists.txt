@@ -5,16 +5,16 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # Output directory (mirrors _build/) 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY         ${CMAKE_CURRENT_LIST_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_LIST_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG   ${CMAKE_CURRENT_LIST_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_LIST_DIR})
 file(GLOB SRCS "src/*.c")
 add_executable(csvparser ${SRCS})
 
-message(STATUS "Compiler        : ${CMAKE_C_COMPILER_ID}")
-message(STATUS "Compiler path   : ${CMAKE_C_COMPILER}")
+message(STATUS "Compiler: ${CMAKE_C_COMPILER_ID}")
+message(STATUS "Compiler path: ${CMAKE_C_COMPILER}")
 message(STATUS "Frontend variant: ${CMAKE_C_COMPILER_FRONTEND_VARIANT}")
-message(STATUS "Cygwin          : ${CYGWIN}")
+message(STATUS "Cygwin : ${CYGWIN}")
 
 
 #  Priority order (first match wins):

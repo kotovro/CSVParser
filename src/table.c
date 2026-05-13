@@ -18,11 +18,11 @@ void free_header(HeaderCell *header)
     }
 }
 
-void free_line(Line *line, long column_count)
+void free_line(Line *line, size_t column_count)
 {
     if (!line) return;
 
-    for (int i = 0; i < column_count; i++) {
+    for (size_t i = 0; i < column_count; i++) {
         free(line->cells[i].data);
     }
     free(line->cells);
@@ -171,7 +171,7 @@ int create_header(const char *header_line, HeaderCell *header_cell, char delimit
     }
 
     int delimiter_count = 0;
-    for (int i = 0, len = strlen(header_line); i < len; i++) {
+    for (size_t i = 0, len = strlen(header_line); i < len; i++) {
         if (header_line[i] == delimiter) {
             delimiter_count++;
         }
