@@ -31,6 +31,9 @@ char* readLongString(FILE* fp)
     size_t size = 0;
 
     while ((current_char = fgetc(fp)) != EOF && current_char != '\n') {
+        if (current_char == '\r') {
+            continue;
+        }
         if (len + 1 >= size) {
             size = size == 0 ? 128 : size * 2;
             char *tmp = realloc(str, size);
