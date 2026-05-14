@@ -1,3 +1,7 @@
+# Проект CSVParser
+Программа, которая читает произвольную CSV-форму из файла (количество строк и столбцов может быть любым), вычисляет значения ячеек, если это необходимо, и выводит получившуюся табличку в виде CSV-представления в
+консоль. Программа не использует какие-либо внешние библиотки(в точи числое и для юнит-тестов, они реализованы на основании самостоятельно реализованных макросов. Программа может быть расиширена в зависмости от условий эксплуатации: так, например, для четния файлов больших размеров можно (в рамках Linux с помощью mmap) реализовать его храенние в виртуальной памяти, и хранения его в целом в виде чанков, и последующий парсинг формул организовать уже по чанкам. С помощью встроенного  в C11 с помощью uchar можно релаитзовать поддержку UTF-8 симвлов.
+
 # Сборка проекта — csvparser
 
 ## Требования
@@ -9,35 +13,35 @@
 
 ## Сборка
 
-### Linux / macOS — GCC или Clang
+### Linux / macOS - GCC или Clang
 
 ```sh
 cmake -S . -B _build
 cmake --build _build
 ```
 
-### Windows — MSVC (cl.exe)
+### Windows - MSVC (cl.exe)
 
 ```bat
 cmake -S . -B _build -G "Visual Studio 17 2022"
 cmake --build _build --config Release
 ```
 
-### Windows — clang-cl (LLVM + MSVC frontend)
+### Windows - clang-cl (LLVM + MSVC frontend)
 
 ```bat
 cmake -S . -B _build -G "Ninja" -DCMAKE_C_COMPILER=clang-cl
 cmake --build _build
 ```
 
-### Windows — Clang (GNU frontend / MinGW-style)
+### Windows - Clang (GNU frontend / MinGW-style)
 
 ```bat
 cmake -S . -B _build -G "Ninja" -DCMAKE_C_COMPILER=clang
 cmake --build _build
 ```
 
-### Cygwin — GCC
+### Cygwin - GCC
 
 В терминале Cygwin:
 
