@@ -1,22 +1,20 @@
-#include "fileutils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "errors_utils.h"
+#include "fileutils.h"
+
 FILE* open_file_if_valid(const char *filename, char **error_message) {
     if (filename == NULL) {
-        char *message = "No filename provided.";
-        *error_message = malloc(strlen(message) + 1);
-        sprintf(*error_message, "%s", message);
+        set_error_message(error_message, "%s", "No filename provided.");
         return NULL;
     }
 
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
-        char *message = "Failed to open file: ";
-        *error_message = malloc(strlen(message) + strlen(filename) + 1);
-        sprintf(*error_message, "%s%s", message, filename);
+        set_error_message(error_message, "Failed to open file: %s", filename);
         return NULL;
     }
 

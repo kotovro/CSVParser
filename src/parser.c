@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "errors_utils.h"
 #include "parser.h"
 
 Cell* get_cell_from_string(Table* table, char* operand_str);
@@ -29,10 +30,7 @@ void parse_table(Table *table, char **error_message) {
 
 bool get_value_from_cell(Table* table, Cell* cell, char* cell_name, char** error_message) {
     if (cell->value_state == CELL_VALUE_PENDING) {
-        char *message = "Cyclic dependency detected in cell: ";
-        *error_message = malloc(strlen(message) + strlen(cell_name) + 1);
-        sprintf(*error_message, "%s%s", message, cell_name);
-        
+        set_error_message(error_message, "Cyclic dependency detected in cell: %s", cell_name);
         return false;
     }
 
@@ -90,10 +88,7 @@ bool get_value_from_string(Table *table, const char* str, char* cell_name, long*
         *out_val = operand1_val * operand2_val;
     } else if (operator == '/') {
         if (operand2_val == 0) {
-            char *message = "Division by zero in cell: %s";
-            size_t message_len = strlen(message) + strlen(cell_name) + 1;
-            *error_message = malloc(message_len);
-            sprintf(*error_message, message, cell_name);
+            set_error_message(error_message, "Division by zero in cell: %s", cell_name);
             return false; // Division by zero
         }
         *out_val = operand1_val / operand2_val;
