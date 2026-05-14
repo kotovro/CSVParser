@@ -15,6 +15,7 @@ void test_missing_leading_delimiter_semicolon(void);
 void test_invalid_column_name(void);
 void test_duplicate_column_name(void);
 void test_trailing_delimiter_causes_empty_column(void);
+void test_return_value_matches_column_count(void);
 
 void run_create_header_tests(void) {
     test_multiple_columns();
@@ -24,6 +25,7 @@ void run_create_header_tests(void) {
     test_invalid_column_name();
     test_duplicate_column_name();
     test_trailing_delimiter_causes_empty_column();
+    test_return_value_matches_column_count();
 }
 
 void test_multiple_columns(void) {
@@ -108,7 +110,7 @@ void test_duplicate_column_name(void) {
     char *err = NULL;
     int result = create_header(",cola,cola,colb", root, ',', &err);
 
-    ASSERT_NUM_EQ(result, -1);
+    ASSERT_NUM_EQ(-1, result);
     ASSERT_STR_EQ(err, "Duplicate column name: cola");
 
     free(err);
@@ -122,7 +124,7 @@ void test_trailing_delimiter_causes_empty_column(void) {
     char *err = NULL;
     int result = create_header(",colb,colf,", root, ',', &err);
 
-    ASSERT_NUM_EQ(result, -1);
+    ASSERT_NUM_EQ(-1, result);
     ASSERT_STR_EQ(err, "Too many empty column names.");
 
     free(err);
@@ -136,7 +138,7 @@ void test_only_delimiters(void) {
     char *err = NULL;
     int result = create_header(",,,", root, ',', &err);
 
-    ASSERT_NUM_EQ(result, -1);
+    ASSERT_NUM_EQ(-1, result);
     ASSERT_STR_EQ(err, "Too many empty column names.");
 
     free(err);
@@ -150,7 +152,7 @@ void test_return_value_matches_column_count(void) {
     char *err = NULL;
     int result = create_header(",a,b,c,d,e", root, ',', &err);
 
-    ASSERT_NUM_EQ(result, 6);
+    ASSERT_NUM_EQ(6, result);
     ASSERT_PTR_EQ(err, NULL);
 
     free_header(root);
