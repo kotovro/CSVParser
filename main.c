@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "fileutils.h"
-#include "table.h"
+#include "src/fileutils.h"
+#include "src/table.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
