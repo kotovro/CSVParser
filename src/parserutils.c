@@ -38,7 +38,7 @@ bool safe_strtol(const char *str, long *out_val) {
     return true;
 }
 
-ptrdiff_t  get_operator_position(const char *formula) {
+ptrdiff_t get_operator_position(const char *formula) {
     for (size_t i = 1, len = strlen(formula); i < len; i++) {
         char c = formula[i];
         if (c == '+' || c == '-' || c == '*' || c == '/') {
@@ -50,6 +50,10 @@ ptrdiff_t  get_operator_position(const char *formula) {
 
 bool is_formula_valid(char *formula)
 {
+    if (!formula || *formula == '\0') {
+        return false;
+    }
+    
     ptrdiff_t operator_position = get_operator_position(formula);
     if (operator_position == -1) {
         return false; // No operator found
@@ -75,12 +79,19 @@ bool try_get_operands(const char *formula, char **out_operand1, char **out_opera
     
     // Extract operands and operator
     *out_operand1 = malloc(operator_position + 1); 
+    if (!out_operand1) {
+        return false; // Handle memory allocation failure
+    }
     strncpy(*out_operand1, formula, operator_position);
     (*out_operand1)[operator_position] = '\0'; // Null-terminate the string
     
     *out_operator = formula[operator_position];
 
     *out_operand2 = malloc(strlen(formula) - operator_position + 1); 
+    if (!out_operand2) {
+        free(*out_operand1);
+        return false; // Handle memory allocation failure
+    }
     strcpy(*out_operand2, formula + operator_position + 1);
     
     return true;

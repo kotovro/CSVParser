@@ -5,8 +5,8 @@
 #include <string.h>
 
 // Глобальные счетчики для статистики тестов
-int tests_run = 0;
-int tests_failed = 0;
+extern int tests_run;
+extern int tests_failed;
 
 // Макрос для проверки целых чисел (int, long)
 #define ASSERT_NUM_EQ(expected, actual) do { \

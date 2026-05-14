@@ -107,6 +107,13 @@ Table* create_table(FILE *file, char delimiter, char **error_message)
 
 int create_header(const char *header_line, HeaderCell *header_cell, char delimiter, char **error_message)
 {
+    if (!header_line) {
+        char *message = "Header line is NULL.";
+        *error_message = malloc(strlen(message) + 1);
+        sprintf(*error_message, "%s", message);
+        return -1;
+    }
+
     if (*header_line != delimiter) {
         char *message = "First column name should be empty.";
         *error_message = malloc(strlen(message) + 1);
@@ -122,6 +129,7 @@ int create_header(const char *header_line, HeaderCell *header_cell, char delimit
     }
     strcpy(tmp_header, header_line);
     char *token = strtok(tmp_header, &delimiter);
+
     HeaderCell *current = header_cell;
     int header_size = 1;
 

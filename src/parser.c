@@ -79,6 +79,9 @@ bool get_value_from_string(Table *table, const char* str, char* cell_name, long*
         return false;
     }
 
+    free(operand1_str);
+    free(operand2_str);
+
     if (operator == '+') {
         *out_val = operand1_val + operand2_val;
     } else if (operator == '-') {
