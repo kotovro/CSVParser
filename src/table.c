@@ -36,12 +36,17 @@ void free_table(Table* table)
 {
     if (!table) return;
 
+    
+    fprintf(stderr, "will try free header\n");
     free_header(table->first_header_cell);
+    fprintf(stderr, "freed header\n");
 
     Line *current_line = table->first_line;
     while (current_line) {
         Line *next_line = current_line->next;
+        fprintf(stderr, "will try free line\n");
         free_line(current_line, table->column_count - 1);
+        fprintf(stderr, "line freed\n");
         current_line = next_line;
     }
 
@@ -81,8 +86,11 @@ Table* create_table(FILE *file, char delimiter, char **error_message)
     HeaderCell *header_start_cell = malloc(sizeof(HeaderCell));
     header_start_cell->next = NULL;
     header_start_cell->column_name = NULL;
+    fprintf(stderr, "try create header\n");
     int col_count = create_header(line, header_start_cell, delimiter, error_message);
     free(line);
+    
+    fprintf(stderr, "created header\n");
 
     if (*error_message) {
         free_header(header_start_cell);
@@ -103,9 +111,14 @@ Table* create_table(FILE *file, char delimiter, char **error_message)
 
     // Читаем, пока функция не вернет NULL (EOF)
     while ((line = readLongString(file)) != NULL) {
+        fprintf(stderr, "will try add row\n");
         add_row(table, line, delimiter, error_message);
+        fprintf(stderr, "added row\n");
+        
         free(line);
+        fprintf(stderr, "freed line\n");
         if (*error_message) {
+            fprintf(stderr, "we are here\n");
             free_table(table);
             return NULL;
         }
@@ -220,6 +233,7 @@ void add_row(Table *table, const char *line_str, char delimiter, char **error_me
     strcpy(tmp_line, line_str);
 
     char *token = strtok(tmp_line, &delimiter);
+    fprintf(stderr, "token is %s\n", token);
     get_line_number_from_token(token, &new_line->line_number, error_message);
     if (*error_message) {
         free(tmp_line);
@@ -238,7 +252,6 @@ void add_row(Table *table, const char *line_str, char delimiter, char **error_me
     if (!new_line->cells) {
         set_error_message(error_message, "%s", "Failed to allocate memory for cells.");
         free(tmp_line);
-        free(new_line);
         return; // Handle memory allocation failure
     }
 
@@ -247,7 +260,6 @@ void add_row(Table *table, const char *line_str, char delimiter, char **error_me
         if (!token) {
             set_error_message(error_message, "Not enough cells in line: %s", line_str);
             free(tmp_line);
-            free(new_line);
             return; // Handle insufficient cells
         }
         new_line->cells[i].value_state = CELL_VALUE_UNPARSED;
@@ -256,7 +268,6 @@ void add_row(Table *table, const char *line_str, char delimiter, char **error_me
         if (!new_line->cells[i].data) {
             set_error_message(error_message, "%s", "Failed to allocate memory for cell data.");
             free(tmp_line);
-            free_line(new_line, table->column_count - 1);
             return; // Handle memory allocation failure
         }
         strcpy(new_line->cells[i].data, token);
@@ -279,6 +290,7 @@ void check_row_size(const char* line_str, char delimiter, size_t expected_column
 }
 
 void get_line_number_from_token(const char* token, long *line_number, char** error_message) {
+    fprintf(stderr, "get_line_number_from_token: token is %s\n", token);
     if (!token) {
         set_error_message(error_message, "%s", "Line number token is missing.");
         return;
