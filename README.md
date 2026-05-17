@@ -79,3 +79,4 @@ cmake --build _build --target csvparser_tests
 Если директория `tests/` пуста, CMake пропускает цель и выводит об этом сообщение на этапе конфигурации.
 
 ### Автор - Воронецкий Константин
+почта: kotvoro@gmail.com
